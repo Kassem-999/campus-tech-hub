@@ -1,0 +1,28 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">✦</span><span>Campus<span>Hub</span></span></div>
+    <nav>
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><span>⌂</span> Overview</a>
+      <a routerLink="/dashboard/events" routerLinkActive="active"><span>◈</span> Discover events</a>
+      <a routerLink="/dashboard/tickets" routerLinkActive="active"><span>♢</span> My tickets</a>
+      <a routerLink="/dashboard/clubs" routerLinkActive="active"><span>◎</span> Clubs</a>
+      @if (auth.isAdmin()) { <a routerLink="/dashboard/events/new" routerLinkActive="active"><span>＋</span> Create event</a> }
+    </nav>
+    <div class="sidebar-bottom">
+      <a routerLink="/dashboard/settings" routerLinkActive="active"><span>⚙</span> Settings</a>
+      <div class="profile-mini">
+        <div class="avatar">{{ (auth.user()?.full_name || 'U').charAt(0) }}</div>
+        <div><strong>{{ auth.user()?.full_name || 'Student account' }}</strong><small>{{ auth.user()?.role || 'student' }}</small></div>
+        <button class="menu-button" (click)="toggleMenu()">⋮</button>
+        @if (menuOpen()) { <div class="profile-menu"><a routerLink="/dashboard/settings" (click)="menuOpen.set(false)">Profile Settings</a><button (click)="logout()">Log Out</button></div> }
+      </div>
+    </div>
+  </aside>
+  <main class="content">
+    <header class="topbar">
+      <div><p class="eyebrow">CAMPUS TECH EVENT HUB</p><h1>Good evening, <em>{{ auth.user()?.full_name || 'student' }}</em> <span>✦</span></h1></div>
+      <div class="header-actions"><div class="avatar large">{{ (auth.user()?.full_name || 'U').charAt(0) }}</div></div>
+    </header>
+    <router-outlet></router-outlet>
+  </main>
+</div>

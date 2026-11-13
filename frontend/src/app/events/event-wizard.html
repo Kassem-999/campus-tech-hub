@@ -1,0 +1,13 @@
+<main class="wizard-page">
+  <div class="wizard-shell">
+    <a class="back" href="/dashboard">← Back to dashboard</a>
+    <header><p class="eyebrow">CLUB ADMIN WORKSPACE</p><h1>Create a new <em>event</em></h1><p>Share an experience your campus community will remember.</p></header>
+    <div class="steps">@for (label of ['Basics', 'Details', 'Publish']; track label; let i = $index) {<div [class.active]="step() === i + 1"><b>{{ i + 1 }}</b>{{ label }}</div>}</div>
+    <form (ngSubmit)="step() === 3 ? submit() : next()">
+      @if (step() === 1) {<section><label>Event title<input name="title" [(ngModel)]="form.title" required placeholder="e.g. Build Night: AI for Good"></label><label>Category<select name="category" [(ngModel)]="form.category"><option value="workshop">Workshop</option><option value="hackathon">Hackathon</option><option value="guest_speaker">Guest speaker</option><option value="other">Other</option></select></label><label>Club ID<input name="clubId" type="number" [(ngModel)]="form.clubId" min="1" required></label></section>}
+      @if (step() === 2) {<section><label>Event description<textarea name="description" [(ngModel)]="form.description" required placeholder="Tell attendees what they will learn..."></textarea></label><div class="editor-tools"><b>B</b><i>I</i><u>U</u><span>• List</span></div><label>Venue<input name="venue" [(ngModel)]="form.venue" required placeholder="Innovation Lab, Building A"></label><div class="two"><label>Date and time<input name="eventDate" type="datetime-local" [(ngModel)]="form.eventDate" required></label><label>Capacity<input name="totalCapacity" type="number" [(ngModel)]="form.totalCapacity" min="1" required></label></div></section>}
+      @if (step() === 3) {<section class="review"><div class="review-icon">✦</div><h2>{{ form.title || 'Untitled event' }}</h2><p>{{ form.description || 'Add a description in the previous step.' }}</p><div class="review-meta"><span>◷ {{ form.eventDate || 'Date not set' }}</span><span>◉ {{ form.venue || 'Venue not set' }}</span><span>♢ {{ form.totalCapacity }} seats</span></div><div class="publish-note">Your event will be visible in the campus discovery feed immediately after publishing.</div></section>}
+      @if (error()) {<p class="error">{{ error() }}</p>}<footer><button type="button" class="secondary" [disabled]="step() === 1" (click)="previous()">Previous</button><button type="submit" class="primary">{{ step() === 3 ? 'Publish event' : 'Continue' }} <span>→</span></button></footer>
+    </form>
+  </div>
+</main>
