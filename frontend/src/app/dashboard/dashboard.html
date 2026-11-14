@@ -1,6 +1,18 @@
 <div class="shell">
   <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">✦</span><span>Campus<span>Hub</span></span></div>
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 32 32" role="img" aria-label="CampusHub">
+        <defs>
+          <linearGradient id="brandSparkle" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#b6f56b"/>
+            <stop offset="1" stop-color="#4fd13a"/>
+          </linearGradient>
+        </defs>
+        <path d="M16 3C17.2 10.8 21.2 14.8 29 16c-7.8 1.2-11.8 5.2-13 13C14.8 21.2 10.8 17.2 3 16 10.8 14.8 14.8 10.8 16 3Z" fill="url(#brandSparkle)"/>
+        <path d="M25 22c.5 2.8 1.2 3.5 4 4-2.8.5-3.5 1.2-4 4-.5-2.8-1.2-3.5-4-4 2.8-.5 3.5-1.2 4-4Z" fill="#7ddc4a"/>
+      </svg>
+      <span>Campus<span>Hub</span></span>
+    </div>
     <nav>
       <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><span>⌂</span> Overview</a>
       <a routerLink="/dashboard/events" routerLinkActive="active"><span>◈</span> Discover events</a>
@@ -21,7 +33,7 @@
   <main class="content">
     <header class="topbar">
       <div><p class="eyebrow">CAMPUS TECH EVENT HUB</p><h1>Good evening, <em>{{ auth.user()?.full_name || 'student' }}</em> <span>✦</span></h1></div>
-      <div class="header-actions"><div class="avatar large">{{ (auth.user()?.full_name || 'U').charAt(0) }}</div></div>
+      <div class="header-actions"><button class="avatar large avatar-button" type="button" aria-label="Open profile settings" (click)="openProfile()">{{ (auth.user()?.full_name || 'U').charAt(0) }}</button></div>
     </header>
     <router-outlet></router-outlet>
   </main>

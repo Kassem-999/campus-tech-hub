@@ -15,8 +15,8 @@ export class AuthService {
     return this.http.post<{ token: string; user: User }>(`${this.baseUrl}/auth/login`, { email, password }).pipe(tap(result => this.setSession(result)));
   }
 
-  register(fullName: string, email: string, password: string, role: 'student' | 'club_admin') {
-    return this.http.post<{ token: string; user: User }>(`${this.baseUrl}/auth/register`, { full_name: fullName, email, password, role }).pipe(tap(result => this.setSession(result)));
+  register(fullName: string, email: string, password: string) {
+    return this.http.post<{ token: string; user: User }>(`${this.baseUrl}/auth/register`, { full_name: fullName, email, password, role: 'student' }).pipe(tap(result => this.setSession(result)));
   }
 
   logout(): void {

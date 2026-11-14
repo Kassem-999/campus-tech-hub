@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostListener, OnInit, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 
 @Component({
@@ -12,11 +12,13 @@ import { AuthService } from '../core/auth.service';
 })
 export class Dashboard implements OnInit {
   readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   readonly menuOpen = signal(false);
 
   ngOnInit(): void {}
   toggleMenu(): void { this.menuOpen.update(value => !value); }
   logout(): void { this.auth.logout(); }
+  openProfile(): void { this.router.navigate(['/settings']); }
 
   @HostListener('document:click', ['$event'])
   closeMenu(event: Event): void {

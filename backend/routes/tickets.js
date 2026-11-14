@@ -36,18 +36,65 @@ router.post('/', authenticate, async (req, res, next) => {
 
 async function cancelTicket(req, res, next) {
   const connection = await db.getConnection();
+  let transactionStarted = false;
   try {
     await connection.beginTransaction();
-    const [tickets] = await connection.execute("SELECT * FROM tickets WHERE id=? AND user_id=? AND status='confirmed' FOR UPDATE", [req.params.id, req.user.id]);
-    if (!tickets[0]) { await connection.rollback(); return res.status(404).json({ message: 'Active ticket not found' }); }
-    await connection.execute("UPDATE tickets SET status='cancelled' WHERE id=?", [req.params.id]);
-    await connection.execute('UPDATE events SET available_seats = available_seats + 1, popularity_score = GREATEST(popularity_score - 1, 0) WHERE id=?', [tickets[0].event_id]);
+    transactionStarted = true;
+
+    const ticketId = Number.parseInt(req.params.id, 10);
+    if (!Number.isInteger(ticketId) || ticketId < 1) {
+      await connection.rollback();
+      return res.status(400).json({ message: 'Invalid ticket id' });
+    }
+
+    // Keep this query limited to columns required by cancellation so schema
+    // extensions do not make a valid cancellation fail.
+    const [tickets] = await connection.execute(
+      'SELECT id, event_id, status FROM tickets WHERE id = ? AND user_id = ? FOR UPDATE',
+      [ticketId, req.user.id]
+    );
+    const ticket = tickets[0];
+    if (!ticket) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Ticket not found for this user' });
+    }
+    if (ticket.status === 'cancelled') {
+      await connection.commit();
+      return res.status(200).json({ message: 'Ticket already cancelled', ticketId });
+    }
+    if (ticket.status !== 'confirmed') {
+      await connection.rollback();
+      return res.status(409).json({ message: `Ticket cannot be cancelled from status '${ticket.status}'` });
+    }
+
+    const [updated] = await connection.execute(
+      "UPDATE tickets SET status = 'cancelled' WHERE id = ? AND user_id = ? AND status = 'confirmed'",
+      [ticketId, req.user.id]
+    );
+    if (updated.affectedRows !== 1) {
+      await connection.rollback();
+      return res.status(409).json({ message: 'Ticket status changed; please refresh and try again' });
+    }
+
+    // Do not touch popularity_score here: cancellation only needs to restore
+    // capacity, and this remains compatible with older event table variants.
+    await connection.execute(
+      'UPDATE events SET available_seats = available_seats + 1 WHERE id = ?',
+      [ticket.event_id]
+    );
     await connection.commit();
-    res.json({ message: 'Ticket cancelled' });
-  } catch (error) { await connection.rollback(); next(error); } finally { connection.release(); }
+    res.status(200).json({ message: 'Ticket cancelled', ticketId, eventId: ticket.event_id, status: 'cancelled' });
+  } catch (error) {
+    if (transactionStarted) {
+      try { await connection.rollback(); } catch (rollbackError) { console.error('Ticket cancellation rollback failed:', rollbackError); }
+    }
+    next(error);
+  } finally {
+    connection.release();
+  }
 }
 
-router.patch('/:id/cancel', cancelTicket);
-router.put('/:id/cancel', cancelTicket);
+router.patch('/:id/cancel', authenticate, cancelTicket);
+router.put('/:id/cancel', authenticate, cancelTicket);
 
 module.exports = router;

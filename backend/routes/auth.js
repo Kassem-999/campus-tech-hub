@@ -12,9 +12,8 @@ router.post('/register', async (req, res, next) => {
     const fullName = req.body.fullName || req.body.full_name;
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = req.body.password;
-    const role = req.body.role || 'student';
+    const role = 'student';
     if (!fullName || !email || !password) return res.status(400).json({ message: 'full_name, email and password are required' });
-    if (!['student', 'club_admin', 'super_admin'].includes(role)) return res.status(400).json({ message: 'Invalid role' });
     const hash = await bcrypt.hash(password, 12);
     const [result] = await db.execute('INSERT INTO users (full_name, email, password, role) VALUES (?, ?, ?, ?)', [fullName, email, hash, role]);
     const user = { id: result.insertId, full_name: fullName, email, role };
